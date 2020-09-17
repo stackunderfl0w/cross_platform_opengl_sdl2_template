@@ -1,10 +1,10 @@
+#include <iostream>
+
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
-#include "glad/glad.h"
+#include <glad/glad.h>
 #endif
-
-#include <iostream>
 //#include "glad/glad.h"
 
 #include <SDL2/SDL.h>
@@ -19,6 +19,9 @@
 #include "imgui/examples/imgui_impl_sdl.h"
 #include "imgui/examples/imgui_impl_opengl3.h"
 
+#ifdef IMGUI_IMPL_OPENGL_LOADER_GLEW
+int x=2;
+#endif
 
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
@@ -27,21 +30,18 @@ Camera camera(glm::vec3(-5.0f, 1.0f, 1.0f),
               0,
               0);
 int main(int argc, char *argv[]) {
-    //gladLoadGL();
+    cout<<"hi"<<endl;
+    gladLoadGL();
+
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         SDL_Log("SDL_Init: %s\n", SDL_GetError());
         return -1;
     }
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-
-    //if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-    //    std::cout << "Failed to initialize GLAD" << std::endl;
-    //    return -1;
-    //}
-
     SDL_Window *window=SDL_CreateWindow("Stackunderfl0w opengl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCR_WIDTH, SCR_HEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (!window) {
@@ -49,6 +49,12 @@ int main(int argc, char *argv[]) {
         SDL_Quit();
         return -1;
     }
+    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+
     glClearColor(0.2f, 0.3f, 0.4f, 0.0f);
     glEnable(GL_DEPTH_TEST);
 

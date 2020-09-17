@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.0.2)
 set(SHORT_NAME cross_platform_opengl_sdl2_template)
 project(${SHORT_NAME})
 
-include(CMakeDependentOption)
+if(WIN32)
+    add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD=1)
+    message("hello")
+endif()
+
+
+    include(CMakeDependentOption)
 set(OPENGL_HELPERS
         src/glhelpers/shaderloader.h
         src/glhelpers/shaders.h
@@ -23,19 +29,14 @@ set(IMGUI_FILES
         src/imgui/imgui_widgets.cpp
         )
 set(SOURCE_FILES
-        src/glad/glad.c
-        src/glad/glad.h
-        src/glad/khrplatform.h
-        ${IMGUI_FILES}
         src/main.cpp
-
+        src/glad.c
+        ${IMGUI_FILES}
         )
 
 include_directories(${PROJECT_SOURCE_DIR}/src/imgui)
-add_library("glad" "src/glad/glad.c")
-include_directories(
-        "scr/glad"
-)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ldl  ")
 
 if(VITA_BUILD AND SWITCH_BUILD)
@@ -624,7 +625,7 @@ function(GET_SDL_EXT_DIR result module)
 endfunction()
 
 find_package(SDL2 REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+#find_package(SDL2_mixer REQUIRED)
 
 add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
 
@@ -637,7 +638,7 @@ if(APPLE)
     #target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} )
     target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARY} )
     #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM <OpenGL/gl3.h>
-    add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_CUSTOM=<OpenGL/gl3.h>)
+    #add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_CUSTOM=<OpenGL/gl3.h>)
 
 
 
@@ -708,8 +709,8 @@ if(PNG_FOUND)
     include_directories(${PNG_INCLUDE_DIRS})
     target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
 else()
-    include_directories("ext/png")
-    target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}" "${ZLIB_FILES}")
+    #include_directories("ext/png")
+    #target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}" "${ZLIB_FILES}")
 endif()
 
 if(VITA_BUILD)
@@ -824,7 +825,7 @@ else()
     if (UNIX AND NOT APPLE AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang"))
         target_link_libraries(${SHORT_NAME} m)
     endif()
-    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} "glad")
+    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
     if(NOT APPLE)
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
