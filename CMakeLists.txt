@@ -23,15 +23,20 @@ set(IMGUI_FILES
         src/imgui/imgui_widgets.cpp
         )
 set(SOURCE_FILES
-        src/main.cpp
-        src/glad/glad.h
         src/glad/glad.c
+        src/glad/glad.h
         src/glad/khrplatform.h
         ${IMGUI_FILES}
+        src/main.cpp
 
         )
 
 include_directories(${PROJECT_SOURCE_DIR}/src/imgui)
+add_library("glad" "src/glad/glad.c")
+include_directories(
+        "scr/glad"
+)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ldl  ")
 
 if(VITA_BUILD AND SWITCH_BUILD)
     message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON and -DSWITCH_BUILD=ON at the same time")
@@ -77,7 +82,7 @@ else()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration -ldl")
 
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
         set(CMAKE_C_FLAGS "-Werror=incompatible-pointer-types -Werror=int-conversion -Wstrict-prototypes ${CMAKE_C_FLAGS}")
@@ -819,7 +824,7 @@ else()
     if (UNIX AND NOT APPLE AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang"))
         target_link_libraries(${SHORT_NAME} m)
     endif()
-    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} "glad")
     if(NOT APPLE)
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
