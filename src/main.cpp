@@ -5,6 +5,9 @@
 #else
 #include <glad/glad.h>
 #endif*/
+#ifdef NINTENDO_SWITCH
+#include <switch.h>
+#endif
 #include <glad/glad.h>
 
 #include <SDL2/SDL.h>
@@ -68,6 +71,8 @@ int main(int argc, char *argv[]) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -240,6 +245,23 @@ int main(int argc, char *argv[]) {
 
         SDL_GL_SwapWindow(window);
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
+    SDL_GL_DeleteContext(context);
+
+    printf("exiting\n");
+    //SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    printf("sdl window destroyed\n");
+    SDL_GL_DeleteContext(context);
+    printf("gl context deleted\n");
+    SDL_Quit();
+    printf("sdl closed\n");
+    //glDeleteProgram(programID);
+    //glDeleteProgram(uiShader.ID);
+    //glDeleteProgram(lightingShader.ID);
+    //glDeleteProgram(textureshader.ID);
     return 0;
 }

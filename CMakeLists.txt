@@ -1,11 +1,41 @@
 cmake_minimum_required(VERSION 3.0.2)
+include(CMakeDependentOption)
+#-DSWITCH_BUILD=ON
+#set(-DSWITCH_BUILD=ON)
+
+if(VITA_BUILD AND SWITCH_BUILD)
+    message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON and -DSWITCH_BUILD=ON at the same time")
+endif()
+
+option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
+option(SYSTEM_LIBS "Use system libraries when available." ON)
+cmake_dependent_option(VITA_BUILD "Build for the PlayStation Vita handheld game console." OFF "NOT MSVC" OFF)
+cmake_dependent_option(SWITCH_BUILD "Build for the Nintendo Switch handheld game console." ON "NOT MSVC; NOT VITA_BUILD" OFF)
+
+if(VITA_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{VITASDK})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
+    else()
+        message(FATAL_ERROR "Please define VITASDK to point to your SDK path!")
+    endif()
+endif()
+
+if(SWITCH_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{DEVKITPRO})
+        set(DEVKITPRO $ENV{DEVKITPRO})
+        set(CMAKE_TOOLCHAIN_FILE "./cmake/switch.cmake" CACHE PATH "toolchain file")
+    else()
+        message(FATAL_ERROR "Please define DEVKITPRO to point to your SDK path!")
+    endif()
+endif()
+
 set(SHORT_NAME cross_platform_opengl_sdl2_template)
 project(${SHORT_NAME})
 
 add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD=1)
+#SET (SWITCH_BUILD ON)
 
 
-    include(CMakeDependentOption)
 set(OPENGL_HELPERS
         src/glhelpers/shaderloader.h
         src/glhelpers/shaders.h
@@ -27,42 +57,18 @@ set(IMGUI_FILES
         )
 set(SOURCE_FILES
         src/main.cpp
-        src/glad.c
         ${IMGUI_FILES}
         )
+if (NOT SWITCH_BUILD)
+    set(SOURCE_FILES ${SOURCE_FILES} include/glad/glad.c)
+    include_directories(${PROJECT_SOURCE_DIR}/include)
+
+endif ()
+add_compile_definitions(NINTENDO_SWITCH=1)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/imgui)
-include_directories(${PROJECT_SOURCE_DIR}/include)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ldl  ")
-
-if(VITA_BUILD AND SWITCH_BUILD)
-    message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON and -DSWITCH_BUILD=ON at the same time")
-endif()
-
-option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
-option(SYSTEM_LIBS "Use system libraries when available." ON)
-cmake_dependent_option(VITA_BUILD "Build for the PlayStation Vita handheld game console." OFF "NOT MSVC" OFF)
-cmake_dependent_option(SWITCH_BUILD "Build for the Nintendo Switch handheld game console." OFF "NOT MSVC; NOT VITA_BUILD" OFF)
-
-if(VITA_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{VITASDK})
-        set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
-    else()
-        message(FATAL_ERROR "Please define VITASDK to point to your SDK path!")
-    endif()
-endif()
-
-if(SWITCH_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{DEVKITPRO})
-        set(DEVKITPRO $ENV{DEVKITPRO})
-        set(CMAKE_TOOLCHAIN_FILE "./cmake/switch.cmake" CACHE PATH "toolchain file")
-    else()
-        message(FATAL_ERROR "Please define DEVKITPRO to point to your SDK path!")
-    endif()
-endif()
-
-
 if (VITA_BUILD)
     include("${VITASDK}/share/vita.cmake" REQUIRED)
     set(VITA_TITLEID  "JULIUS001")
@@ -80,7 +86,7 @@ else()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration -ldl")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration")
 
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
         set(CMAKE_C_FLAGS "-Werror=incompatible-pointer-types -Werror=int-conversion -Wstrict-prototypes ${CMAKE_C_FLAGS}")
@@ -161,6 +167,7 @@ if(VITA_BUILD)
 endif()
 
 if (SWITCH_BUILD)
+    message("hello")
     string(SUBSTRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}" 0 15 SWITCH_VERSION)
 endif()
 
@@ -774,6 +781,7 @@ elseif(SWITCH_BUILD)
             SDL2_mixer
             SDL2
             EGL
+            glad
             GLESv2
             glapi
             drm_nouveau
