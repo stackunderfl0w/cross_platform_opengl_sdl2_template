@@ -632,7 +632,7 @@ endif()
 
 if(APPLE)
     find_package(OpenGl REQUIRED)
-    #target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} )
+    target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} )
     target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARY} )
     #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM <OpenGL/gl3.h>
     #add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_CUSTOM=<OpenGL/gl3.h>)

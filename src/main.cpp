@@ -1,11 +1,11 @@
 #include <iostream>
 
-#ifdef __APPLE__
+/*#ifdef __APPLEs__
 #include <OpenGL/gl3.h>
 #else
 #include <glad/glad.h>
-#endif
-//#include "glad/glad.h"
+#endif*/
+#include <glad/glad.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -30,7 +30,9 @@ Camera camera(glm::vec3(-5.0f, 1.0f, 1.0f),
               0);
 int main(int argc, char *argv[]) {
     cout<<"hi"<<endl;
+    #ifndef __APPLE__
     gladLoadGL();
+    #endif
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         SDL_Log("SDL_Init: %s\n", SDL_GetError());
