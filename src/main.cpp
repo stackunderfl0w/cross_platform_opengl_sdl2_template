@@ -24,6 +24,8 @@ int x=2;
 
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
+int sdl_interval_mode=0;
+
 Camera camera(glm::vec3(-5.0f, 1.0f, 1.0f),
               glm::vec3(0.0f, 1.0f, 0.0f),
               0,
@@ -58,6 +60,8 @@ int main(int argc, char *argv[]) {
 
     glClearColor(0.2f, 0.3f, 0.4f, 0.0f);
     glEnable(GL_DEPTH_TEST);
+    SDL_GL_SetSwapInterval(sdl_interval_mode);
+
 
     cout<<glGetString(GL_VERSION)<<endl;
 
@@ -159,7 +163,7 @@ int main(int argc, char *argv[]) {
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         camera.Pitch=25.0f*(float)sin(SDL_GetTicks()/1000.0);
         //camera.Position.x=(float)sin(SDL_GetTicks()/1000.0);
-        cout<<sin(SDL_GetTicks()/1000.0)<<endl;
+        //cout<<sin(SDL_GetTicks()/1000.0)<<endl;
         //cout<<camera.Pitch<<endl;
         camera.ProcessMouseMovement(0,0);
 
@@ -205,11 +209,10 @@ int main(int argc, char *argv[]) {
             ImGui::Text("counter = %d", counter);
             ImGui::Text("yaw = %f", camera.Yaw);
             ImGui::Text("pitch = %f", camera.Pitch);
-            ImGui::Text("pos = %f %f %f", camera.Position.x, camera.Position.y,camera.Position.z);
-            //ImGui::InputText("input text", equation, IM_ARRAYSIZE(equation));
-            double temp_x,temp_y;
-            ImGui::InputDouble("x",&temp_x,.01,1,"%.8f");
-            ImGui::InputDouble("y",&temp_y,.01,1,"%.8f");
+            //ImGui::Text("pos = %f %f %f", camera.Position.x, camera.Position.y,camera.Position.z);
+            ImGui::SliderInt("Swap interval",&sdl_interval_mode,-1,1);
+            SDL_GL_SetSwapInterval(sdl_interval_mode);
+
 
             //cout<<te_eval(expr)<<endl;
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
