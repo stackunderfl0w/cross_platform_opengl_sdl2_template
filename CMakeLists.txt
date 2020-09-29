@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 include(CMakeDependentOption)
+
+set(SHORT_NAME cross_platform_opengl_sdl2_template)
+
 #-DSWITCH_BUILD=ON
 #set(-DSWITCH_BUILD=ON)
 
@@ -7,10 +10,12 @@ if(VITA_BUILD AND SWITCH_BUILD)
     message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON and -DSWITCH_BUILD=ON at the same time")
 endif()
 
+option(WIN_RELEASE "Disable console" OFF)
+
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
 option(SYSTEM_LIBS "Use system libraries when available." ON)
 cmake_dependent_option(VITA_BUILD "Build for the PlayStation Vita handheld game console." OFF "NOT MSVC" OFF)
-cmake_dependent_option(SWITCH_BUILD "Build for the Nintendo Switch handheld game console." ON "NOT MSVC; NOT VITA_BUILD" OFF)
+cmake_dependent_option(SWITCH_BUILD "Build for the Nintendo Switch handheld game console." OFF "NOT MSVC; NOT VITA_BUILD" OFF)
 
 if(VITA_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -29,7 +34,6 @@ if(SWITCH_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-set(SHORT_NAME cross_platform_opengl_sdl2_template)
 project(${SHORT_NAME})
 
 add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD=1)
@@ -64,7 +68,9 @@ if (NOT SWITCH_BUILD)
     include_directories(${PROJECT_SOURCE_DIR}/include)
 
 endif ()
-add_compile_definitions(NINTENDO_SWITCH=1)
+if (SWITCH_BUILD)
+    add_compile_definitions(NINTENDO_SWITCH=1)
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/src/imgui)
 
@@ -631,7 +637,11 @@ endfunction()
 find_package(SDL2 REQUIRED)
 #find_package(SDL2_mixer REQUIRED)
 
-add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
+if (WIN_RELEASE)
+    add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
+else()
+    add_executable(${SHORT_NAME} ${SOURCE_FILES})
+endif ()
 
 if(MSVC)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
